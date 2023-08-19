@@ -40,8 +40,9 @@
 
     - we can also link frontend to backend either using cors or setting up the proxy.
 
-
 ### Response send to browser by server
+
     - Body
     - Headers
     - status code
+

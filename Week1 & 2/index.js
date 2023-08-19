@@ -1,3 +1,4 @@
+/*
 const express = require("express");
 const cors = require("cors");
 
@@ -57,45 +58,53 @@ function homeRoute(req, res) {
     `The sum of ${req.body.counter} is ${calculateSum(req.body.counter)}`
   );
 }
-// const express = require("express");
-// var bodyParser = require("body-parser");
-// const multer = require("multer");
-// const upload = multer(); // config
-// const app = express();
+*/
 
-// app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({ extended: true }));
+const express = require("express");
+var bodyParser = require("body-parser");
+const app = express();
 
-// app.use(upload.any());
-// const port = 3000;
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-// // app.use(express.urlencoded({ extended: true }));
-// // app.use(express.json());
+const port = 3000;
 
-// // console.log(calculateSum(100));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
-// function homeRoute(req, res) {
-//   // console.log(req.query);
-//   // console.log(req.params);
-//   const obj = JSON.parse(JSON.stringify(req.body));
-//   console.log(obj);
-//   res.send(
-//     `The Sum of first 100 terms is : ${calculateSum(parseInt(obj.counter))}`
-//   );
-// }
+// console.log(calculateSum(100));
 
-// function homeRoutePost(req, res) {
-//   console.log(req.body);
-//   console.log(parseInt("123"));
-//   res.send("I am the Post request...");
-// }
+function calculateSum(range) {
+  let sum = 0;
 
-// app.get("/", homeRoute);
-// app.post("/", homeRoute);
-// // app.get("/counter/:id", homeRoutePost);
+  for (var i = 1; i <= 5; i++) {
+    sum += i;
+  }
+  return sum;
+}
 
-// function startListening() {
-//   console.log(`Server is running on https://localhost:${port}`);
-// }
+function homeRoute(req, res) {
+  console.log(req.query);
+  console.log(req.params.id);
+  const obj = JSON.parse(JSON.stringify(req.body));
+  console.log(obj);
+  res.send(
+    `The Sum of first 100 terms is : ${calculateSum(parseInt(obj.counter))}`
+  );
+}
 
-// app.listen(port, startListening);
+function homeRoutePost(req, res) {
+  console.log(req.body);
+  console.log(parseInt("123"));
+  res.send("I am the Post request...");
+}
+
+app.get("/counter/:id", homeRoute);
+app.post("/", homeRoutePost);
+// app.get("/counter/:id", homeRoutePost);
+
+function startListening() {
+  console.log(`Server is running on https://localhost:${port}`);
+}
+
+app.listen(port, startListening);
