@@ -9,9 +9,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "..", "/client")));
 
-let toDoList = [];
-
 // todo: get using array
+let toDoList = [];
 
 app.get("/", function(req, res) {
   res.sendFile(path.join(__dirname, "../client/index.html"));
@@ -62,9 +61,15 @@ function findIndex(arr, id) {
 function removeIndex(arr, id) {
   return arr.filter(x => x.id !== id);
 }
- 
+
 app.delete("/todos/:id", (req, res) => {
   const id = parseInt(req.params.id);
+
+  fs.readFile("./files.json", "utf-8", (err, data) => {
+    if (!err) {
+      toDoList = JSON.parse(data);
+    }
+  });
 
   const index = findIndex(toDoList, id);
 
@@ -72,6 +77,9 @@ app.delete("/todos/:id", (req, res) => {
     res.status(404).send("No Such item exists in record.");
   } else {
     toDoList = removeIndex(toDoList, id);
+    fs.writeFile("./files.json", JSON.stringify(toDoList), err =>
+      console.log(err)
+    );
     res.status(200).send(toDoList);
   }
 });
