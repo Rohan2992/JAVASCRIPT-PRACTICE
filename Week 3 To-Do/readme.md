@@ -1,4 +1,4 @@
-# Week 3.1 Finishing backend, starting frontend
+# Week 3.1 & 3.2 Finishing backend, starting frontend
 
     - Callback function using
         - passing functions
@@ -30,7 +30,9 @@
     - Moving from older state to new state by doing some dom-manipulations
     - Virtual Dom consists of objects and not real tags
 
-# POP - point of presence
+# Week 3.3 - Transcoder
+
+### POP - point of presence
 
     - Backend does not send data with the help of CDN.
     - CDN is used only to send static data(HTML, CSS, JS).
@@ -38,24 +40,36 @@
     - CDN also does caching - used to store the data in the memory and recall it when necessary.
     - backend worls on source of truth and data is stored on a server..
 
-# Ways to deploy backend
+### Ways to deploy backend
 
     - Repl.it
     - GCP, AWS
     - fly.io
     - Firebase functions
 
-Pull Based approach
+    - Pull Based approach
 
-Push based approach
+    - Push based approach
 
-auto scaling - scale transcoders acc. to needs - pay only for per request(lambda - not used as it is expensive for timed processes)
+    - auto scaling - scale transcoders acc. to needs - pay only for per request(lambda - not used as it is expensive for timed processes)
 
-AWS auto scaling groups
+    - AWS auto scaling groups
 
-instance -> node.js(getting, transcode,send_back)
+    - instance -> node.js(getting, transcode,send_back)
 
-we give it a number and it crates instances.. it fails as we decrease the number it frees any of the instance not that which has completed successfully its execution..
+    - we give it a number and it crates instances.. it fails as we decrease the number it frees any of the instance not that which has completed successfully its execution..
 
-final approach ->
+    - final approach ->
+
 Node.js server starts every 5 min. and looks if queue.size > 1 - then create instance with increase in the size of auto scaling groups(ASG)
+
+# Week 3.4 - Authentication and Databases
+
+    - code 403 - understood but refused to authorize.
+    - code 201 - new resource created successfully.
+
+    - Middlewares are used in authentication
+    - We can give any no. of middleware functions inside the routes
+    - search for Object.assign method
+
+### JWT - json wen token
