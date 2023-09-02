@@ -23,6 +23,20 @@ function authorizeAdmin(req, res, next) {
   }
 }
 
+function authorizeUser(req, res, next) {
+  const { username, password } = req.headers;
+
+  const user = USERS.find(
+    u => u.username === username && u.password === password
+  );
+  if (user) {
+    req.user = user;
+    next();
+  } else {
+    res.status(403).json({ message: "User authentication failed" });
+  }
+}
+
 function cbListener(port) {
   console.log("Listening on " + port);
 }
@@ -83,11 +97,43 @@ app.get("/admin/courses", authorizeAdmin, (req, res) => {
 
 //user routes
 
-app.post("/users/signup", (req, res) => {});
-app.post("/users/login", (req, res) => {});
-app.get("/users/courses", (req, res) => {});
-app.post("/users/courses/:courseId", (req, res) => {});
-app.get("/users/purchasedCourses", (req, res) => {});
+app.post("/users/signup", (req, res) => {
+  const user = USERS.find(u => u.username === req.body.username);
+  if (user) {
+    res.status(403).json({ mesage: "User already exists" });
+  } else {
+    USERS.push({ ...req.body, subscribedCourses: [] });
+    res.status(201).json({ mesage: "User created successfully" });
+  }
+});
+app.post("/users/login", authorizeUser, (req, res) => {
+  res.send({ message: "Logged in successfully" });
+});
+app.get("/users/courses", authorizeUser, (req, res) => {
+  const courses = COURSES.filter(c => c.published === "true");
+  res.json(courses);
+});
+app.post("/users/courses/:courseId", authorizeUser, (req, res) => {
+  const id = parseInt(req.params.courseId);
+
+  const course = COURSES.find(c => c.courseId === id && c.published === "true");
+  if (course) {
+    req.user.subscribedCourses.push(id);
+    res.json({ message: "Course purchased successfully" });
+  } else {
+    res.status(404).json({ message: "Course not found or not available" });
+  }
+});
+app.get("/users/purchasedCourses", authorizeUser, (req, res) => {
+  const purchasedCoursesIdx = req.user.subscribedCourses;
+  const purchasedCourses = [];
+  for (let i = 0; i < COURSES.length; i++) {
+    if (purchasedCoursesIdx.indexOf(COURSES[i].courseId) !== -1) {
+      purchasedCourses.push(COURSES[i]);
+    }
+  }
+  res.json({ courses: purchasedCourses });
+});
 
 // listener
 app.listen(port, cbListener(port));
