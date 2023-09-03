@@ -1,0 +1,20 @@
+[
+  {
+    "username": "user",
+    "password": "12345",
+    "subscribedCourses": [
+      {
+        "title": "Pencil",
+        "description": "This is a Pencil",
+        "published": "true",
+        "courseId": 1
+      },
+      {
+        "title": "Pen",
+        "description": "This is a Pen",
+        "published": "true",
+        "courseId": 2
+      }
+    ]
+  }
+]
