@@ -55,7 +55,7 @@ function authorizeJWT(req, res, next) {
 
 const generateJwt = user => {
   const payload = { username: user.username };
-  return jwt.sign(payload, secretKey, { expiresIn: "20m" });
+  return jwt.sign(payload, secretKey, { expiresIn: "2h" });
 };
 
 function cbListener(port) {
@@ -93,13 +93,19 @@ app.post("/admin/login", async (req, res) => {
 });
 
 app.post("/admin/courses", authorizeJWT, async (req, res) => {
-  const course = new Course(req.body);
-  await course.save();
+  const courseExists = await Course.findOne({ title: req.body.title });
 
-  res.status(201).json({
-    message: "Course created successfully",
-    course: course
-  });
+  if (courseExists) {
+    res.send({ message: "Course already exists and cannot be created" });
+  } else {
+    const course = new Course(req.body);
+    await course.save();
+
+    res.status(201).json({
+      message: "Course created successfully",
+      course: course
+    });
+  }
 });
 
 app.get("/admin/courses/:courseId", authorizeJWT, async (req, res) => {
@@ -119,7 +125,7 @@ app.put("/admin/courses/:courseId", authorizeJWT, async (req, res) => {
     { ...req.body },
     { new: true }
   );
-  console.log(course);
+  // console.log(course);
   if (course) {
     res.status(200).json({ message: "Course updated successfully", course });
   } else {
@@ -166,16 +172,43 @@ app.get("/users/courses", authorizeJWT, async (req, res) => {
 });
 
 app.post("/users/courses/:courseId", authorizeJWT, async (req, res) => {
+  // const course = await Course.findById(req.params.courseId);
+  // console.log(course);
+  // if (course) {
+  //   const user = await User.findOne({ username: req.user.username });
+  //   if (user) {
+  //     user.purchasedCourses.push(course);
+  //     await user.save();
+  //     res.json({ message: "Course purchased successfully" });
+  //   } else {
+  //     res.status(403).json({ message: "User not found" });
+  //   }
+  // } else {
+  //   res.status(404).json({ message: "Course not found" });
+  // }
+
+  const id = req.params.courseId;
   const course = await Course.findById(req.params.courseId);
-  console.log(course);
+  // console.log(course);
   if (course) {
     const user = await User.findOne({ username: req.user.username });
-    if (user) {
+    let flag = false;
+    // console.log(user.purchasedCourses);
+
+    // Do something with the referencedDocument
+    for (const refId of user.purchasedCourses) {
+      if (refId.equals(id)) {
+        flag = true;
+      }
+    }
+    if (user && !flag) {
       user.purchasedCourses.push(course);
       await user.save();
       res.json({ message: "Course purchased successfully" });
     } else {
-      res.status(403).json({ message: "User not found" });
+      res
+        .status(403)
+        .json({ message: "Either User not found or Course already exists" });
     }
   } else {
     res.status(404).json({ message: "Course not found" });
