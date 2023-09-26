@@ -1,6 +1,7 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
+const cors = require("cors");
 
 const app = express();
 const port = 3000;
@@ -10,6 +11,7 @@ const dbName = "CourseSellingDB";
 // Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(cors());
 
 const secretKey = "MY_SECRET_KEY";
 
@@ -37,19 +39,22 @@ const User = mongoose.model("User", UserSchema);
 const Course = mongoose.model("Course", CourseSchema);
 //functions
 function authorizeJWT(req, res, next) {
-  const authHeader = req.headers.authorization;
-  if (authHeader) {
-    const token = authHeader.split(" ")[1];
+  // console.log(req.headers.authorization);
+  if (req.headers.authorization !== undefined) {
+    const authHeader = req.headers.authorization;
+    if (authHeader) {
+      const token = authHeader.split(" ")[1];
 
-    jwt.verify(token, secretKey, (err, data) => {
-      if (err) {
-        res.status(403).send({ message: "Authorization failed" });
-      }
-      req.user = data;
-      next();
-    });
-  } else {
-    res.status(401).send({ message: "Authorization failed" });
+      jwt.verify(token, secretKey, (err, data) => {
+        if (err) {
+          res.status(403).send({ message: "Authorization failed" });
+        }
+        req.user = data;
+        next();
+      });
+    } else {
+      res.status(401).send({ message: "Authorization failed" });
+    }
   }
 }
 
@@ -80,12 +85,21 @@ app.post("/admin/signup", async (req, res) => {
   }
 });
 
+app.get("/admin/me", authorizeJWT, (req, res) => {
+  // console.table(req.user);
+  if (req.user !== undefined) {
+    {
+      res.json({ user: req.user.username });
+    }
+  }
+});
+
 app.post("/admin/login", async (req, res) => {
   const { username, password } = req.headers;
   const admin = await Admin.findOne({ username, password });
 
   if (admin) {
-    const token = generateJwt(req.body);
+    const token = generateJwt({ username });
     res.json({ message: "Logged in successfully", token: token });
   } else {
     res.status(403).send({ message: "Admin does not exist" });
